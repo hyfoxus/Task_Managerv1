@@ -10,17 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Comment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String content;
+  private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
+  @ManyToOne
+  @JoinColumn(name = "author_id")
+  private User author;
 
-    @ManyToOne
-    private Task task;
-
+  @ManyToOne private Task task;
 }

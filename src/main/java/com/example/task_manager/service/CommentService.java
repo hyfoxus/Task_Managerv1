@@ -12,20 +12,18 @@ import java.util.List;
 @Service
 public class CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
+  @Autowired private CommentRepository commentRepository;
 
-    @Autowired
-    private TaskRepository taskRepository;
+  @Autowired private TaskRepository taskRepository;
 
-    public List<Comment> getCommentsByTaskId(Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
-        return commentRepository.findByTask(task);
-    }
+  public List<Comment> getCommentsByTaskId(Long taskId) {
+    Task task = taskRepository.findById(taskId).orElseThrow();
+    return commentRepository.findByTask(task);
+  }
 
-    public Comment addCommentToTask(Long taskId, Comment comment) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
-        comment.setTask(task);
-        return commentRepository.save(comment);
-    }
+  public Comment addCommentToTask(Long taskId, Comment comment) {
+    Task task = taskRepository.findById(taskId).orElseThrow();
+    comment.setTask(task);
+    return commentRepository.save(comment);
+  }
 }

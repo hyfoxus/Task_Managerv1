@@ -12,26 +12,25 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+  public List<User> getAllUsers() {
+    return userRepository.findAll();
+  }
 
-    public List<User> getUsersByRole(Role role) {
-        return userRepository.findByRole(role);
-    }
+  public List<User> getUsersByRole(Role role) {
+    return userRepository.findByRole(role);
+  }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
+  public Optional<User> getUserById(Long id) {
+    return userRepository.findById(id);
+  }
 
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+  public Optional<User> getUserByEmail(String email) {
+    return userRepository.findByEmail(email);
+  }
 
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
+  public User saveUser(User user) {
+    return userRepository.save(user);
+  }
 }

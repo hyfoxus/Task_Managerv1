@@ -11,16 +11,15 @@ import java.util.List;
 @RequestMapping("/comments")
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+  @Autowired private CommentService commentService;
 
-    @GetMapping("/task/{taskId}")
-    public List<Comment> getCommentsByTask(@PathVariable Long taskId) {
-        return commentService.getCommentsByTaskId(taskId);
-    }
+  @GetMapping("/task/{taskId}")
+  public List<Comment> getCommentsByTask(@PathVariable Long taskId) {
+    return commentService.getCommentsByTaskId(taskId);
+  }
 
-    @PostMapping("/task/{taskId}")
-    public Comment addCommentToTask(@PathVariable Long taskId, @RequestBody Comment comment) {
-        return commentService.addCommentToTask(taskId, comment);
-    }
+  @PostMapping("/task/{taskId}")
+  public Comment addCommentToTask(@PathVariable Long taskId, @RequestBody Comment comment) {
+    return commentService.addCommentToTask(taskId, comment);
+  }
 }

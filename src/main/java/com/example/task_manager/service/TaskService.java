@@ -6,11 +6,10 @@ import com.example.task_manager.enums.TaskPriority;
 import com.example.task_manager.enums.TaskStatus;
 import com.example.task_manager.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TaskService {

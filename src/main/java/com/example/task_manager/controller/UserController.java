@@ -12,21 +12,20 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+  @GetMapping
+  public List<User> getAllUsers() {
+    return userRepository.findAll();
+  }
 
-    @GetMapping("/role/{role}")
-    public List<User> getUsersByRole(@PathVariable Role role) {
-        return userRepository.findByRole(role);
-    }
+  @GetMapping("/role/{role}")
+  public List<User> getUsersByRole(@PathVariable Role role) {
+    return userRepository.findByRole(role);
+  }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userRepository.findById(id).orElseThrow();
-    }
+  @GetMapping("/{id}")
+  public User getUserById(@PathVariable Long id) {
+    return userRepository.findById(id).orElseThrow();
+  }
 }
