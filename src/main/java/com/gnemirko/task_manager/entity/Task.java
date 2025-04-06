@@ -1,7 +1,7 @@
-package com.example.task_manager.entity;
+package com.gnemirko.task_manager.entity;
 
-import com.example.task_manager.enums.TaskPriority;
-import com.example.task_manager.enums.TaskStatus;
+import com.gnemirko.task_manager.enums.TaskPriority;
+import com.gnemirko.task_manager.enums.TaskStatus;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;

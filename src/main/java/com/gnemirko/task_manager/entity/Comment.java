@@ -1,4 +1,4 @@
-package com.example.task_manager.entity;
+package com.gnemirko.task_manager.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

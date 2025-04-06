@@ -1,11 +1,10 @@
-package com.example.task_manager.controller;
+package com.gnemirko.task_manager.controller;
 
-import com.example.task_manager.entity.Comment;
-import com.example.task_manager.service.CommentService;
+import com.gnemirko.task_manager.entity.Comment;
+import com.gnemirko.task_manager.service.CommentService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/comments")

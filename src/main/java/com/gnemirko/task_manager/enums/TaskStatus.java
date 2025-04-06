@@ -1,4 +1,4 @@
-package com.example.task_manager.enums;
+package com.gnemirko.task_manager.enums;
 
 public enum TaskStatus {
   PENDING,

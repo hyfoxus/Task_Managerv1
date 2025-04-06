@@ -1,13 +1,12 @@
-package com.example.task_manager.service;
+package com.gnemirko.task_manager.service;
 
-import com.example.task_manager.entity.Comment;
-import com.example.task_manager.entity.Task;
-import com.example.task_manager.repository.CommentRepository;
-import com.example.task_manager.repository.TaskRepository;
+import com.gnemirko.task_manager.entity.Comment;
+import com.gnemirko.task_manager.entity.Task;
+import com.gnemirko.task_manager.repository.CommentRepository;
+import com.gnemirko.task_manager.repository.TaskRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class CommentService {

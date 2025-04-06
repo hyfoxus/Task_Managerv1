@@ -1,10 +1,10 @@
-package com.example.task_manager.service;
+package com.gnemirko.task_manager.service;
 
-import com.example.task_manager.entity.Task;
-import com.example.task_manager.entity.User;
-import com.example.task_manager.enums.TaskPriority;
-import com.example.task_manager.enums.TaskStatus;
-import com.example.task_manager.repository.TaskRepository;
+import com.gnemirko.task_manager.entity.Task;
+import com.gnemirko.task_manager.entity.User;
+import com.gnemirko.task_manager.enums.TaskPriority;
+import com.gnemirko.task_manager.enums.TaskStatus;
+import com.gnemirko.task_manager.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;

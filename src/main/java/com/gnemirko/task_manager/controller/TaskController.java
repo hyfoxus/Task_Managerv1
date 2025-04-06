@@ -1,9 +1,9 @@
-package com.example.task_manager.controller;
+package com.gnemirko.task_manager.controller;
 
-import com.example.task_manager.entity.Task;
-import com.example.task_manager.entity.User;
-import com.example.task_manager.repository.TaskRepository;
-import com.example.task_manager.repository.UserRepository;
+import com.gnemirko.task_manager.entity.Task;
+import com.gnemirko.task_manager.entity.User;
+import com.gnemirko.task_manager.repository.TaskRepository;
+import com.gnemirko.task_manager.repository.UserRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

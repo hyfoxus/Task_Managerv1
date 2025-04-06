@@ -1,6 +1,6 @@
-package com.example.task_manager.entity;
+package com.gnemirko.task_manager.entity;
 
-import com.example.task_manager.enums.Role;
+import com.gnemirko.task_manager.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class User {
   private Long id;
 
   private String email;
-  private String password;
+  private String hashedPassword; // change to Hash for more security
 
   @Enumerated(EnumType.STRING)
   private Role role;
