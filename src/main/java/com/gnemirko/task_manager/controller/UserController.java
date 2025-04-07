@@ -4,27 +4,54 @@ import com.gnemirko.task_manager.entity.User;
 import com.gnemirko.task_manager.enums.Role;
 import com.gnemirko.task_manager.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
+
+import com.gnemirko.task_manager.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-  @Autowired private UserRepository userRepository;
 
+  private final UserService userService;
+
+
+  // Доступен только администратору
   @GetMapping
-  public List<User> getAllUsers() {
-    return userRepository.findAll();
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<User>> getAllUsers() {
+    return ResponseEntity.ok(userService.getAllUsers());
   }
 
-  @GetMapping("/role/{role}")
-  public List<User> getUsersByRole(@PathVariable Role role) {
-    return userRepository.findByRole(role);
-  }
-
+  // Доступен администратору и самому пользователю (сравнение ID)
   @GetMapping("/{id}")
-  public User getUserById(@PathVariable Long id) {
-    return userRepository.findById(id).orElseThrow();
+  @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+  public ResponseEntity<Optional<User>> getUserById(@PathVariable Long id) {
+    return ResponseEntity.ok(userService.getUserById(id));
   }
+
+  // Только для администратора
+  @GetMapping("/role/{role}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<User>> getUsersByRole(@PathVariable Role role) {
+    return ResponseEntity.ok(userService.getUsersByRole(role));
+  }
+
+  // Удаление пользователя — только админ
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    Optional<User> userOpt = userService.getUserById(id);
+    if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+    userService.deleteUser(id);
+    return ResponseEntity.ok("User deleted");
+  }
+
 }

@@ -29,4 +29,8 @@ public class UserService {
     return userRepository.findByEmail(email);
   }
 
+  public void deleteUser(Long id) {
+    userRepository.deleteById(id);
+  }
+
 }
