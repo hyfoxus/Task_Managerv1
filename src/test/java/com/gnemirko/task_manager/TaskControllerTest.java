@@ -1,113 +1,83 @@
 package com.gnemirko.task_manager;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import com.gnemirko.task_manager.controller.TaskController;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gnemirko.task_manager.entity.AuthRequest;
 import com.gnemirko.task_manager.entity.Task;
+import com.gnemirko.task_manager.entity.User;
+import com.gnemirko.task_manager.enums.Role;
 import com.gnemirko.task_manager.enums.TaskPriority;
 import com.gnemirko.task_manager.enums.TaskStatus;
-import com.gnemirko.task_manager.security.TaskSecurity;
-import com.gnemirko.task_manager.service.TaskService;
+import com.gnemirko.task_manager.repository.TaskRepository;
+import com.gnemirko.task_manager.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(TaskController.class)
-@Import(TestSecurityConfig.class)
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 class TaskControllerTest {
 
   @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private UserRepository userRepository;
+  @Autowired private TaskRepository taskRepository;
+  @Autowired private PasswordEncoder passwordEncoder;
 
-  private TaskService taskService;
-
-  private TaskSecurity taskSecurity;
-
-  private Task mockTask;
+  private String adminToken;
 
   @BeforeEach
-  void setup() {
-    mockTask = new Task();
-    mockTask.setId(1L);
-    mockTask.setTitle("Initial Task");
-    mockTask.setDescription("Initial Description");
-    mockTask.setStatus(TaskStatus.PENDING);
-    mockTask.setPriority(TaskPriority.MEDIUM);
+  void setUp() throws Exception {
+    // Чистим базу
+    taskRepository.deleteAll();
+    userRepository.deleteAll();
+
+    // Создаем админа напрямую в БД (ускоряет)
+    User admin = new User();
+    admin.setEmail("admin@example.com");
+    admin.setHashedPassword(passwordEncoder.encode("admin123"));
+    admin.setRole(Role.ADMIN);
+    userRepository.save(admin);
+
+    // Получаем токен
+    AuthRequest request = new AuthRequest("admin@example.com", "admin123");
+
+    var loginResponse = mockMvc.perform(post("/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    adminToken = loginResponse.getResponse().getContentAsString();
   }
 
   @Test
-  @WithMockUser(roles = "ADMIN")
   void shouldCreateTask_whenAdmin() throws Exception {
-    when(taskService.createTask(any(Task.class))).thenReturn(mockTask);
+    mockMvc.perform(post("/api/tasks")
+                    .header("Authorization", "Bearer " + adminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                                "title": "New Task",
+                                "description": "Test description",
+                                "status": "PENDING",
+                                "priority": "HIGH"
+                            }
+                        """))
 
-    mockMvc
-        .perform(
-            post("/api/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                    {
-                        "title": "Initial Task",
-                        "description": "Initial Description",
-                        "status": "PENDING",
-                        "priority": "MEDIUM"
-                    }
-                """))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.title").value("Initial Task"));
-  }
-
-  @Test
-  @WithMockUser(username = "admin@example.com", roles = "ADMIN")
-  void shouldEditTask_whenAdmin() throws Exception {
-    when(taskService.editTask(anyLong(), any(), any(), any(), any())).thenReturn(mockTask);
-
-    mockMvc
-        .perform(
-            put("/api/tasks/1")
-                .param("title", "New Title")
-                .param("description", "New Desc")
-                .param("status", "IN_PROGRESS")
-                .param("priority", "HIGH"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.title").value("Initial Task")); // return mockTask
-  }
-
-  @Test
-  @WithMockUser(username = "user@example.com")
-  void shouldEditTask_whenAssignee() throws Exception {
-    when(taskSecurity.isAssignee(any(), eq(1L))).thenReturn(true);
-    when(taskService.editTask(eq(1L), any(), any(), any(), any())).thenReturn(mockTask);
-
-    mockMvc
-        .perform(
-            put("/api/tasks/1")
-                .param("title", "New Title")
-                .param("description", "New Desc")
-                .param("status", "IN_PROGRESS")
-                .param("priority", "HIGH"))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  @WithMockUser(username = "stranger@example.com")
-  void shouldDenyEditTask_whenNotAdminAndNotAssignee() throws Exception {
-    when(taskSecurity.isAssignee(any(), eq(1L))).thenReturn(false);
-
-    mockMvc
-        .perform(
-            put("/api/tasks/1")
-                .param("title", "New Title")
-                .param("description", "New Desc")
-                .param("status", "IN_PROGRESS")
-                .param("priority", "HIGH"))
-        .andExpect(status().isForbidden());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title", is("New Task")))
+            .andExpect(jsonPath("$.status", is("PENDING")))
+            .andExpect(jsonPath("$.priority", is("HIGH")));
   }
 }

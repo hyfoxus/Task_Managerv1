@@ -4,7 +4,9 @@ import com.gnemirko.task_manager.entity.AuthRequest;
 import com.gnemirko.task_manager.entity.User;
 import com.gnemirko.task_manager.security.JwtTokenProvider;
 import com.gnemirko.task_manager.service.AuthService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +26,15 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-    boolean success = authService.login(request);
-    if (success) {
+    try {
+      boolean success = authService.login(request);
+      if (!success) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+      }
       String token = jwtTokenProvider.createToken(request.getEmail());
-      return ResponseEntity.ok().body(token);
-    } else {
-      return ResponseEntity.status(401).body("Invalid credentials");
+      return ResponseEntity.ok(token);
+    } catch (EntityNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
   }
 }

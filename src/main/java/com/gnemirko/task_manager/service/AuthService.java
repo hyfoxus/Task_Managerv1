@@ -29,6 +29,6 @@ public class AuthService {
         userRepository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new EntityNotFoundException("No User Found!"));
-    return user.getHashedPassword().equals(passwordEncoder.encode(request.getPassword()));
+    return passwordEncoder.matches(request.getPassword(), user.getHashedPassword());
   }
 }

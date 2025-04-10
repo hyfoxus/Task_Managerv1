@@ -1,78 +1,82 @@
 package com.gnemirko.task_manager;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gnemirko.task_manager.controller.AuthController;
 import com.gnemirko.task_manager.entity.AuthRequest;
 import com.gnemirko.task_manager.entity.User;
 import com.gnemirko.task_manager.enums.Role;
-import com.gnemirko.task_manager.security.JwtTokenProvider;
-import com.gnemirko.task_manager.service.AuthService;
+import com.gnemirko.task_manager.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(AuthController.class)
-@Import(TestSecurityConfig.class)
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
 class AuthControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @Autowired private AuthService authService;
-  @Autowired private JwtTokenProvider jwtTokenProvider;
+  @Autowired
+  private MockMvc mockMvc;
 
-  private AuthRequest request;
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @BeforeEach
   void setUp() {
-    request = new AuthRequest("test@example.com", "password123");
-
-    when(authService.register(any()))
-        .thenReturn(new User(1L, "test@example.com", "hashed", Role.USER));
-
-    when(authService.login(any())).thenReturn(true);
-    when(jwtTokenProvider.createToken("test@example.com")).thenReturn("mocked-token");
+    userRepository.deleteAll(); // очищаем базу перед каждым тестом
   }
 
   @Test
   void register_shouldReturnUser() throws Exception {
+    AuthRequest request = new AuthRequest("test@example.com", "password123");
+
     mockMvc
-        .perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.email").value("test@example.com"));
+            .perform(
+                    post("/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+            .andDo(result -> System.out.println(result.getResponse().getContentAsString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.email").value("test@example.com"));
   }
 
   @Test
   void login_shouldReturnToken_whenCredentialsAreValid() throws Exception {
-    mockMvc
-        .perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(content().string("mocked-token"));
+    AuthRequest request = new AuthRequest("test@example.com", "password123");
+
+    // Register first
+    mockMvc.perform(post("/auth/register")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+
+    // Login
+    mockMvc.perform(post("/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(content().string(org.hamcrest.Matchers.notNullValue()));
   }
 
   @Test
   void login_shouldReturnUnauthorized_whenInvalid() throws Exception {
-    when(authService.login(any())).thenReturn(false);
+    AuthRequest request = new AuthRequest("invalid@example.com", "wrongpassword");
 
     mockMvc
-        .perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isUnauthorized());
+            .perform(
+                    post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isUnauthorized());
   }
 }

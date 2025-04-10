@@ -14,7 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -32,8 +32,10 @@ public class UserController {
   // Доступен администратору и самому пользователю (сравнение ID)
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-  public ResponseEntity<Optional<User>> getUserById(@PathVariable Long id) {
-    return ResponseEntity.ok(userService.getUserById(id));
+  public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    return userService.getUserById(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   // Только для администратора
