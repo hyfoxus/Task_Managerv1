@@ -25,4 +25,11 @@ public class CommentService {
     comment.setTask(task);
     return commentRepository.save(comment);
   }
+
+  public Comment getCommentbyId(Long commentId) {
+    return commentRepository.findById(commentId).orElseThrow();
+  }
+  public void deleteComment(Long commentId){
+    commentRepository.deleteById(commentId);
+  }
 }
